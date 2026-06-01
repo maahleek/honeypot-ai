@@ -1,0 +1,35 @@
+{"timestamp": "2026-05-28T16:14:04.090488+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 34772, "event_type": "CONNECTION", "details": {"status": "connected"}}
+{"timestamp": "2026-05-28T16:15:22.871373+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 34772, "event_type": "DISCONNECTION", "details": {}}
+{"timestamp": "2026-05-28T16:16:01.376285+00:00", "service": "HTTP", "attacker_ip": "127.0.0.1", "attacker_port": 0, "event_type": "ADMIN_ACCESS", "details": {"path": "/admin"}}
+{"timestamp": "2026-05-28T16:16:21.782258+00:00", "service": "HTTP", "attacker_ip": "127.0.0.1", "attacker_port": 0, "event_type": "ADMIN_ACCESS", "details": {"path": "/admin"}}
+{"timestamp": "2026-05-30T12:58:10.460903+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 40630, "event_type": "CONNECTION", "details": {"status": "connected"}}
+{"timestamp": "2026-05-30T12:59:20.556191+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 40630, "event_type": "AUTH_ATTEMPT", "details": {"username": "root", "password": "admin123", "method": "password"}}
+{"timestamp": "2026-05-30T12:59:28.892968+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 40630, "event_type": "AUTH_ATTEMPT", "details": {"username": "root", "password": "comrade", "method": "password"}}
+{"timestamp": "2026-05-30T12:59:35.509421+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 40630, "event_type": "DISCONNECTION", "details": {}}
+{"timestamp": "2026-05-30T13:02:03.121453+00:00", "service": "HTTP", "attacker_ip": "127.0.0.1", "attacker_port": 0, "event_type": "ADMIN_ACCESS", "details": {"path": "/admin"}}
+{"timestamp": "2026-05-31T13:00:11.528562+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 35542, "event_type": "CONNECTION", "details": {"status": "connected"}}
+{"timestamp": "2026-05-31T13:00:12.984410+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 35542, "event_type": "DISCONNECTION", "details": {}}
+{"timestamp": "2026-05-31T13:01:37.807322+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 44984, "event_type": "CONNECTION", "details": {"status": "connected"}}
+{"timestamp": "2026-05-31T13:02:35.357824+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 44984, "event_type": "AUTH_ATTEMPT", "details": {"username": "root", "password": "malkido", "method": "password"}}
+{"timestamp": "2026-05-31T13:02:40.093669+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 44984, "event_type": "AUTH_ATTEMPT", "details": {"username": "root", "password": "emkay", "method": "password"}}
+{"timestamp": "2026-05-31T13:02:44.932807+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 44984, "event_type": "AUTH_ATTEMPT", "details": {"username": "root", "password": "ouyourmind", "method": "password"}}
+{"timestamp": "2026-05-31T13:02:44.964889+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 44984, "event_type": "DISCONNECTION", "details": {}}
+{"timestamp": "2026-05-31T13:18:27.157157+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 56448, "event_type": "CONNECTION", "details": {"status": "connected"}}
+{"timestamp": "2026-05-31T13:18:34.662527+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 56448, "event_type": "AUTH_ATTEMPT", "details": {"username": "root", "password": "Malkido5590", "method": "password"}}
+{"timestamp": "2026-05-31T13:18:39.445000+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 56448, "event_type": "AUTH_ATTEMPT", "details": {"username": "root", "password": "kiomla", "method": "password"}}
+{"timestamp": "2026-05-31T13:18:46.363667+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 56448, "event_type": "AUTH_ATTEMPT", "details": {"username": "root", "password": "pas123", "method": "password"}}
+{"timestamp": "2026-05-31T13:18:46.654407+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 56448, "event_type": "DISCONNECTION", "details": {}}
+{"timestamp": "2026-05-31T13:23:30.627950+00:00", "service": "HTTP", "attacker_ip": "127.0.0.1", "attacker_port": 0, "event_type": "ADMIN_ACCESS", "details": {"path": "/admin"}}
+{"timestamp": "2026-05-31T13:23:30.725095+00:00", "service": "HTTP", "attacker_ip": "127.0.0.1", "attacker_port": 0, "event_type": "ADMIN_ACCESS", "details": {"path": "/wp-login.php"}}
+{"timestamp": "2026-05-31T13:23:30.864380+00:00", "service": "HTTP", "attacker_ip": "127.0.0.1", "attacker_port": 0, "event_type": "ADMIN_ACCESS", "details": {"method": "GET", "path": "/phpmyadmin", "user_agent": "curl/8.5.0", "body": ""}}
+{"timestamp": "2026-05-31T13:23:30.999989+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 43496, "event_type": "CONNECTION", "details": {"status": "connected"}}
+{"timestamp": "2026-05-31T13:23:53.718857+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 43496, "event_type": "AUTH_ATTEMPT", "details": {"username": "root", "password": "kiddo 1233", "method": "password"}}
+{"timestamp": "2026-05-31T13:23:58.406574+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 43496, "event_type": "AUTH_ATTEMPT", "details": {"username": "root", "password": "passs5677", "method": "password"}}
+{"timestamp": "2026-05-31T13:24:01.096833+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 43496, "event_type": "DISCONNECTION", "details": {}}
+{"timestamp": "2026-05-31T13:52:55.967648+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 57882, "event_type": "CONNECTION", "details": {"status": "connected"}}
+{"timestamp": "2026-05-31T13:52:57.728753+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 57882, "event_type": "DISCONNECTION", "details": {}}
+{"timestamp": "2026-05-31T13:54:57.070696+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 58744, "event_type": "CONNECTION", "details": {"status": "connected"}}
+{"timestamp": "2026-05-31T13:55:41.896517+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 58744, "event_type": "AUTH_ATTEMPT", "details": {"username": "root", "password": "yourmind", "method": "password"}}
+{"timestamp": "2026-05-31T13:55:46.440931+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 58744, "event_type": "AUTH_ATTEMPT", "details": {"username": "root", "password": "mymind", "method": "password"}}
+{"timestamp": "2026-05-31T13:55:52.301955+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 58744, "event_type": "AUTH_ATTEMPT", "details": {"username": "root", "password": "pass123", "method": "password"}}
+{"timestamp": "2026-05-31T13:55:52.590832+00:00", "service": "SSH", "attacker_ip": "127.0.0.1", "attacker_port": 58744, "event_type": "DISCONNECTION", "details": {}}

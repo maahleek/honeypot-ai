@@ -1,0 +1,6 @@
+service_ssh,service_http,service_ftp,service_telnet,is_auth_attempt,is_admin_access,is_sqli,is_path_traversal,is_command,password_len,username_is_root,has_sqli_chars,has_traversal,payload_len,label,label_name,event_type,service,attacker_ip
+1,0,0,0,0,0,0,0,0,0,0,0,0,0,2,Port Scan,CONNECTION,SSH,127.0.0.1
+1,0,0,0,1,0,0,0,0,8,1,0,0,0,6,Credential Stuffing,AUTH_ATTEMPT,SSH,127.0.0.1
+1,0,0,0,1,0,0,0,0,7,1,0,0,0,6,Credential Stuffing,AUTH_ATTEMPT,SSH,127.0.0.1
+1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,Normal,DISCONNECTION,SSH,127.0.0.1
+0,1,0,0,0,1,0,0,0,0,0,0,0,6,6,Credential Stuffing,ADMIN_ACCESS,HTTP,127.0.0.1
