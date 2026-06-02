@@ -1,0 +1,16 @@
+venv/
+data/honeypot.db
+logs/
+ml/model/
+__pycache__/
+*.pyc
+*.joblib
+setup_files.py
+setup_phase2.py
+setup_phase3.py
+setup_phase4.py
+setup_phase5.py
+fix_extractor.py
+fix_dashboard.py
+fix_dashboard2.py
+fix_api.py
