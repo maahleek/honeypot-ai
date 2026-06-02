@@ -14,3 +14,4 @@ fix_extractor.py
 fix_dashboard.py
 fix_dashboard2.py
 fix_api.py
+venv/
