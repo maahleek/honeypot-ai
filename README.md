@@ -8,7 +8,7 @@
 ![Accuracy](https://img.shields.io/badge/Accuracy-98%25-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-A final year project that combines **honeypot deception technology** with **AI-based attack classification** and a **real-time web dashboard**. The system captures, classifies, and visualises network attacks across four simulated services.
+A final project that combines **honeypot deception technology** with **AI-based attack classification** and a **real-time web dashboard**. The system captures, classifies, and visualises network attacks across four simulated services.
 
 ---
 
