@@ -192,7 +192,7 @@ telnet localhost 2323
 
 ## 👨‍💻 Author
 
-**Abdulmalik** (Mkdarkside)
+**Abdulmalik** (Maahleek)
 Final Year Computer Science Student
 University of Maiduguri, Nigeria
 
