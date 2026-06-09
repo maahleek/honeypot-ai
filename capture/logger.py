@@ -1,19 +1,8 @@
-"""
-capture/logger.py — Shared event logger with real-time AI classification.
-
-Every honeypot event is:
-  1. Logged to console (colorized)
-  2. Written to JSONL file
-  3. Saved to SQLite database
-  4. Classified by the AI model in real-time
-  5. Broadcast to dashboard via event queue
-"""
 import json
 import logging
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
-from queue import Queue
 
 import colorlog
 
@@ -26,9 +15,8 @@ except ImportError:
 Path(LOG_DIR).mkdir(parents=True, exist_ok=True)
 
 _file_lock  = threading.Lock()
-event_queue = Queue(maxsize=1000)   # dashboard reads from this
 
-# ── Lazy imports (avoid circular dependencies) ────────────────────────────────
+# ── Lazy imports ──────────────────────────────────────────────────────────────
 _db_save  = None
 _classify = None
 
@@ -52,7 +40,7 @@ def _get_classify():
             _classify = lambda e: None
     return _classify
 
-# ── Console logger ────────────────────────────────────────────────────────────
+# ── Console logger ─────────────────────────────────────────────────────────
 _handler = colorlog.StreamHandler()
 _handler.setFormatter(colorlog.ColoredFormatter(
     fmt="%(log_color)s%(asctime)s%(reset)s [%(log_color)s%(levelname)-8s%(reset)s] %(cyan)s%(name)-10s%(reset)s %(message)s",
@@ -68,13 +56,21 @@ _handler.setFormatter(colorlog.ColoredFormatter(
 logging.basicConfig(level=logging.INFO, handlers=[_handler])
 
 
+
+from queue import Queue
+event_queue = Queue(maxsize=1000)
+
 def get_logger(name: str):
     return logging.getLogger(name)
 
 
 def log_event(service, attacker_ip, attacker_port, event_type, details=None):
     """
-    Log a honeypot event, classify it with AI, and broadcast to dashboard.
+    Log a honeypot event:
+      1. Classify immediately with AI
+      2. Write to JSONL file
+      3. Save to database WITH label already attached
+      4. Print to console
     """
     event = {
         "timestamp"    : datetime.now(timezone.utc).isoformat(),
@@ -85,18 +81,7 @@ def log_event(service, attacker_ip, attacker_port, event_type, details=None):
         "details"      : details or {},
     }
 
-    # 1. Write to JSONL
-    with _file_lock:
-        with open(LOG_FILE, "a", encoding="utf-8") as f:
-            f.write(json.dumps(event) + "\n")
-
-    # 2. Save to database
-    try:
-        _get_db_save()(event)
-    except Exception as e:
-        get_logger("logger").debug(f"DB save failed: {e}")
-
-    # 3. AI Classification
+    # ── 1. AI Classification FIRST (before DB save) ───────────────────────
     classification = None
     try:
         classification = _get_classify()(event)
@@ -105,13 +90,23 @@ def log_event(service, attacker_ip, attacker_port, event_type, details=None):
     except Exception as e:
         get_logger("logger").debug(f"Classification failed: {e}")
 
-    # 4. Push to dashboard queue
-    try:
-        event_queue.put_nowait(event)
-    except Exception:
-        pass
+    # ── 2. Write to JSONL ─────────────────────────────────────────────────
+    with _file_lock:
+        with open(LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(json.dumps(event) + "\n")
 
-    # 5. Console output
+    # ── 3. Save to DB with label ──────────────────────────────────────────
+    try:
+        db_event = dict(event)
+        if classification:
+            # Inject label into details so database.py picks it up
+            db_event["attack_label"] = classification.get("label")
+            db_event["attack_name"]  = classification.get("name")
+        _save_with_label(db_event, classification)
+    except Exception as e:
+        get_logger("logger").debug(f"DB save failed: {e}")
+
+    # ── 4. Console output ─────────────────────────────────────────────────
     logger = get_logger(service)
     if classification:
         label    = classification.get("name", "?")
@@ -125,3 +120,46 @@ def log_event(service, attacker_ip, attacker_port, event_type, details=None):
         logger.info(f"[{event_type}] {attacker_ip}:{attacker_port} | {details}")
 
     return event
+
+
+def _save_with_label(event: dict, classification: dict):
+    """Save event to DB and immediately update with AI label."""
+    import json as _json
+    from capture.database import Session, AttackEvent
+    from datetime import datetime, timezone
+
+    details = event.get("details", {})
+    ts_raw  = event.get("timestamp")
+    try:
+        ts = datetime.fromisoformat(ts_raw).replace(tzinfo=None) if ts_raw else datetime.utcnow()
+    except Exception:
+        ts = datetime.utcnow()
+
+    row = AttackEvent(
+        timestamp     = ts,
+        service       = event.get("service", ""),
+        attacker_ip   = event.get("attacker_ip", ""),
+        attacker_port = event.get("attacker_port", 0),
+        event_type    = event.get("event_type", ""),
+        details       = _json.dumps(details),
+        username      = details.get("username"),
+        password      = details.get("password"),
+        password_len  = len(details["password"]) if details.get("password") else None,
+        http_method   = details.get("method"),
+        http_path     = details.get("path"),
+        user_agent    = details.get("user_agent"),
+        payload       = details.get("body") or details.get("command"),
+        # ── AI label saved immediately ────────────────────────────────────
+        attack_label  = classification.get("label") if classification else None,
+        attack_name   = classification.get("name")  if classification else None,
+    )
+
+    session = Session()
+    try:
+        session.add(row)
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
