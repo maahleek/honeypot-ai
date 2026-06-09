@@ -1,3 +1,10 @@
+"""
+fix_realtime_labels.py — Makes AI labels appear in real-time.
+Run: python fix_realtime_labels.py
+"""
+from pathlib import Path
+
+content = '''
 import json
 import logging
 import threading
@@ -56,10 +63,6 @@ _handler.setFormatter(colorlog.ColoredFormatter(
 logging.basicConfig(level=logging.INFO, handlers=[_handler])
 
 
-
-from queue import Queue
-event_queue = Queue(maxsize=1000)
-
 def get_logger(name: str):
     return logging.getLogger(name)
 
@@ -93,7 +96,7 @@ def log_event(service, attacker_ip, attacker_port, event_type, details=None):
     # ── 2. Write to JSONL ─────────────────────────────────────────────────
     with _file_lock:
         with open(LOG_FILE, "a", encoding="utf-8") as f:
-            f.write(json.dumps(event) + "\n")
+            f.write(json.dumps(event) + "\\n")
 
     # ── 3. Save to DB with label ──────────────────────────────────────────
     try:
@@ -163,3 +166,8 @@ def _save_with_label(event: dict, classification: dict):
         raise e
     finally:
         session.close()
+'''.strip()
+
+Path("capture/logger.py").write_text(content, encoding="utf-8")
+print("Fixed: capture/logger.py")
+print("AI labels will now appear in real-time on the dashboard!")
