@@ -4,7 +4,13 @@ from capture.logger import log_event, get_logger
 from config import HOST, SSH_PORT, SSH_BANNER, AUTH_DELAY_SECONDS, SESSION_TIMEOUT
 
 logger   = get_logger("SSH")
-HOST_KEY = paramiko.RSAKey.generate(2048)
+import os
+_KEY_PATH = os.path.join(os.path.dirname(__file__), '..', 'keys', 'ssh_host_key')
+try:
+    HOST_KEY = paramiko.RSAKey(filename=_KEY_PATH)
+except Exception:
+    HOST_KEY = paramiko.RSAKey.generate(2048)
+    HOST_KEY.write_private_key_file(_KEY_PATH)
 
 class SSHHoneypotServer(paramiko.ServerInterface):
     def __init__(self, ip, port):
