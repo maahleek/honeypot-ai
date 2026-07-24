@@ -1,26 +1,26 @@
 {
   "model": "XGBoost",
-  "accuracy": 0.9763,
-  "rf_accuracy": 0.9763,
-  "xgb_accuracy": 0.9763,
+  "accuracy": 0.6304,
+  "rf_accuracy": 0.6304,
+  "xgb_accuracy": 0.6304,
   "classification_report": {
     "Normal": {
-      "precision": 0.9032258064516129,
-      "recall": 0.9333333333333333,
-      "f1-score": 0.9180327868852459,
-      "support": 30.0
+      "precision": 0.792156862745098,
+      "recall": 0.20781893004115226,
+      "f1-score": 0.3292583537082315,
+      "support": 972.0
     },
     "Brute Force": {
       "precision": 1.0,
-      "recall": 1.0,
-      "f1-score": 1.0,
-      "support": 30.0
+      "recall": 0.7349397590361446,
+      "f1-score": 0.8472222222222222,
+      "support": 83.0
     },
     "Port Scan": {
-      "precision": 0.9310344827586207,
-      "recall": 0.9,
-      "f1-score": 0.9152542372881356,
-      "support": 30.0
+      "precision": 0.5029051000645578,
+      "recall": 0.9362980769230769,
+      "f1-score": 0.6543469130617388,
+      "support": 832.0
     },
     "DoS / Flood": {
       "precision": 1.0,
@@ -32,7 +32,7 @@
       "precision": 1.0,
       "recall": 1.0,
       "f1-score": 1.0,
-      "support": 30.0
+      "support": 31.0
     },
     "Command Injection": {
       "precision": 1.0,
@@ -41,23 +41,23 @@
       "support": 30.0
     },
     "Credential Stuffing": {
-      "precision": 1.0,
+      "precision": 0.9333333333333333,
       "recall": 1.0,
-      "f1-score": 1.0,
-      "support": 31.0
+      "f1-score": 0.9655172413793104,
+      "support": 308.0
     },
-    "accuracy": 0.976303317535545,
+    "accuracy": 0.6303587051618548,
     "macro avg": {
-      "precision": 0.9763228984586048,
-      "recall": 0.9761904761904763,
-      "f1-score": 0.9761838605961974,
-      "support": 211.0
+      "precision": 0.8897707565918556,
+      "recall": 0.8398652522857677,
+      "f1-score": 0.828049247195929,
+      "support": 2286.0
     },
     "weighted avg": {
-      "precision": 0.9764351122099859,
-      "recall": 0.976303317535545,
-      "f1-score": 0.9762967332947936,
-      "support": 211.0
+      "precision": 0.7217236135208286,
+      "recall": 0.6303587051618548,
+      "f1-score": 0.5788077455210148,
+      "support": 2286.0
     }
   }
 }
