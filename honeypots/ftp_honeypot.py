@@ -25,7 +25,8 @@ class HoneypotFTPHandler(FTPHandler):
 
 def start_ftp_honeypot():
     auth = DummyAuthorizer()
-    auth.add_anonymous("/tmp", perm="elradfmwMT")
+    import os
+    auth.add_anonymous(os.path.expanduser("~"), perm="elradfmwMT")
     HoneypotFTPHandler.authorizer       = auth
     HoneypotFTPHandler.banner           = FTP_BANNER
     HoneypotFTPHandler.passive_ports    = range(60000, 60100)
