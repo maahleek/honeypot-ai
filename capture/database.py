@@ -61,7 +61,6 @@ class AttackEvent(Base):
             "attacker_port": self.attacker_port,
             "event_type"   : self.event_type,
             "username"     : self.username,
-            "password"     : self.password,
             "password_len" : self.password_len,
             "http_method"  : self.http_method,
             "http_path"    : self.http_path,
