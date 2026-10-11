@@ -52,10 +52,28 @@ def test_ftp_root_is_isolated_under_project_data():
     assert Path(FTP_ROOT).name == "ftp_root"
 
 
+
+def test_dashboard_start_does_not_require_removed_broadcaster():
+    from unittest.mock import patch
+    from dashboard import app as dashboard_app
+
+    with patch.object(dashboard_app.app, "run") as run_mock:
+        dashboard_app.start_dashboard()
+
+    run_mock.assert_called_once_with(
+        host=dashboard_app.DASHBOARD_HOST,
+        port=dashboard_app.DASHBOARD_PORT,
+        threaded=True,
+        use_reloader=False,
+        debug=False,
+    )
+
+
 if __name__ == "__main__":
     test_feature_vector_handles_redacted_passwords()
     test_passwords_are_redacted_before_persistence()
     test_published_dataset_has_no_attacker_ip_column()
     test_training_split_uses_genuine_only_test_partition()
     test_ftp_root_is_isolated_under_project_data()
+    test_dashboard_start_does_not_require_removed_broadcaster()
     print("Honeypot hardening tests passed.")
