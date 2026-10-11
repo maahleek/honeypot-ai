@@ -65,8 +65,7 @@ def export_csv(output_path: Path = OUTPUT_PATH) -> int:
         print("No events in database yet. Run the honeypot first.")
         return 0
 
-    headers = FEATURE_NAMES + ["label", "label_name",
-                                "event_type", "service", "attacker_ip"]
+    headers = FEATURE_NAMES + ["label", "label_name", "event_type", "service"]
 
     count = 0
     with open(output_path, "w", newline="", encoding="utf-8") as f:
@@ -79,6 +78,9 @@ def export_csv(output_path: Path = OUTPUT_PATH) -> int:
             except Exception:
                 details = {}
 
+            if row.password_len is not None:
+                details["password_len"] = row.password_len
+
             event = {
                 "service"   : row.service,
                 "event_type": row.event_type,
@@ -89,8 +91,7 @@ def export_csv(output_path: Path = OUTPUT_PATH) -> int:
             label_name = ATTACK_LABELS.get(label, "Unknown")
 
             writer.writerow(
-                features + [label, label_name, row.event_type,
-                             row.service, row.attacker_ip]
+                features + [label, label_name, row.event_type, row.service]
             )
             count += 1
 
