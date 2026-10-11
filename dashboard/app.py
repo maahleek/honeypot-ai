@@ -43,7 +43,7 @@ def api_events():
                 cls = {
                     "name"      : r.attack_name,
                     "label"     : r.attack_label,
-                    "confidence": 0.95,
+                    "confidence": None,
                     "severity"  : SEVERITY_MAP.get(r.attack_label or 0, "low"),
                 }
             events.append({
