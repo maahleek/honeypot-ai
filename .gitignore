@@ -1,10 +1,26 @@
+# Local environments and secrets
+.env
+.env.*
 venv/
-data/honeypot.db
-logs/
-ml/model/
+.venv/
+
+# Python/runtime files
 __pycache__/
 *.pyc
-*.joblib
+.pytest_cache/
+
+# Honeypot runtime state
+data/*.db
+data/*.db-*
+data/ftp_root/
+logs/
+keys/
+
+# Generated ML artifacts
+ml/model/*.joblib
+ml/model/training_report.json
+
+# Temporary setup/fix scripts
 setup_files.py
 setup_phase2.py
 setup_phase3.py
@@ -14,5 +30,3 @@ fix_extractor.py
 fix_dashboard.py
 fix_dashboard2.py
 fix_api.py
-venv/
-keys/
