@@ -1,16 +1,16 @@
 import socket, threading, time
 import paramiko
 from capture.logger import log_event, get_logger
-from config import HOST, SSH_PORT, SSH_BANNER, AUTH_DELAY_SECONDS, SESSION_TIMEOUT
+from config import HOST, SSH_PORT, SSH_BANNER, AUTH_DELAY_SECONDS, SESSION_TIMEOUT, KEY_DIR
 
-logger   = get_logger("SSH")
-import os
-_KEY_PATH = os.path.join(os.path.dirname(__file__), '..', 'keys', 'ssh_host_key')
+logger = get_logger("SSH")
+KEY_DIR.mkdir(parents=True, exist_ok=True)
+_KEY_PATH = KEY_DIR / "ssh_host_key"
 try:
-    HOST_KEY = paramiko.RSAKey(filename=_KEY_PATH)
+    HOST_KEY = paramiko.RSAKey(filename=str(_KEY_PATH))
 except Exception:
     HOST_KEY = paramiko.RSAKey.generate(2048)
-    HOST_KEY.write_private_key_file(_KEY_PATH)
+    HOST_KEY.write_private_key_file(str(_KEY_PATH))
 
 class SSHHoneypotServer(paramiko.ServerInterface):
     def __init__(self, ip, port):
