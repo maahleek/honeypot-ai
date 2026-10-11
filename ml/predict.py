@@ -14,8 +14,6 @@ except ImportError:
 MODEL_DIR    = Path("ml/model")
 MODEL_PATH   = MODEL_DIR / "classifier.joblib"
 SCALER_PATH  = MODEL_DIR / "scaler.joblib"
-ENCODER_PATH = MODEL_DIR / "label_encoder.joblib"
-
 ATTACK_LABELS = {
     0: "Normal",
     1: "Brute Force",
@@ -36,18 +34,16 @@ SEVERITY = {
     6: "high",
 }
 
-_model = _scaler = _encoder = None
+_model = _scaler = None
 
 
 def _load():
-    global _model, _scaler, _encoder
+    global _model, _scaler
     if _model is None:
         if not MODEL_PATH.exists():
             return False
         _model  = joblib.load(MODEL_PATH)
         _scaler = joblib.load(SCALER_PATH)
-        if ENCODER_PATH.exists():
-            _encoder = joblib.load(ENCODER_PATH)
     return True
 
 
@@ -65,13 +61,14 @@ def classify(event: dict) -> dict:
         features = extract(ev2)
         X = np.array(features).reshape(1, -1)
         X_scaled = _scaler.transform(X)
-        pred_enc = int(_model.predict(X_scaled)[0])
-        label = int(_encoder.inverse_transform([pred_enc])[0]) if _encoder else pred_enc
+        label = int(_model.predict(X_scaled)[0])
         try:
-            proba      = _model.predict_proba(X_scaled)[0]
-            confidence = round(float(proba[pred_enc]), 4)
-        except:
-            confidence = 0.95
+            proba = _model.predict_proba(X_scaled)[0]
+            classes = [int(value) for value in _model.classes_]
+            class_index = classes.index(label)
+            confidence = round(float(proba[class_index]), 4)
+        except Exception:
+            confidence = 0.0
         return {
             "label"     : label,
             "name"      : ATTACK_LABELS.get(label, "Unknown"),
