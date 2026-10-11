@@ -1,12 +1,11 @@
 from flask import Flask, render_template, jsonify
-from capture.logger import event_queue, get_logger
-from capture.database import get_recent_events, get_stats
-import threading
+from capture.logger import get_logger
+from capture.database import get_stats
 
 try:
     from config import DASHBOARD_HOST, DASHBOARD_PORT, SECRET_KEY
 except ImportError:
-    DASHBOARD_HOST = "0.0.0.0"
+    DASHBOARD_HOST = "127.0.0.1"
     DASHBOARD_PORT = 5000
     SECRET_KEY     = "honeypot-secret"
 
@@ -58,15 +57,6 @@ def api_events():
         return jsonify(events)
     finally:
         session.close()
-
-def _event_broadcaster():
-    logger.info("Event broadcaster started")
-    while True:
-        try:
-            event = event_queue.get(timeout=1)
-            event_queue.task_done()
-        except Exception:
-            pass
 
 def start_dashboard():
     t = threading.Thread(target=_event_broadcaster, name="EventBroadcaster", daemon=True)
