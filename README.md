@@ -268,6 +268,10 @@ python main.py
 
 The honeypot services listen on `0.0.0.0` by default. The dashboard listens only on `127.0.0.1` unless explicitly changed.
 
+## Validation status
+
+The hardened portfolio branch has been validated locally on Windows and in automated CI. Local validation confirmed that SSH, HTTP, FTP, and Telnet listeners start successfully, the dashboard loads on `127.0.0.1:5000`, and the dashboard stats/events APIs respond successfully.
+
 ## Local testing
 
 SSH:
