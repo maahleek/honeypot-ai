@@ -57,11 +57,18 @@ logging.basicConfig(level=logging.INFO, handlers=[_handler])
 
 
 
-from queue import Queue
-event_queue = Queue(maxsize=1000)
-
 def get_logger(name: str):
     return logging.getLogger(name)
+
+
+def _sanitize_details(details: dict | None) -> dict:
+    """Remove raw secrets before events are written to disk or SQLite."""
+    clean = dict(details or {})
+    if "password" in clean:
+        password = str(clean.get("password") or "")
+        clean["password_len"] = len(password)
+        clean.pop("password", None)
+    return clean
 
 
 def log_event(service, attacker_ip, attacker_port, event_type, details=None):
@@ -90,16 +97,20 @@ def log_event(service, attacker_ip, attacker_port, event_type, details=None):
     except Exception as e:
         get_logger("logger").debug(f"Classification failed: {e}")
 
-    # ── 2. Write to JSONL ─────────────────────────────────────────────────
+    # Redact raw passwords after feature extraction/classification and before
+    # any persistent write. Password length is retained as a numeric feature.
+    persisted_event = dict(event)
+    persisted_event["details"] = _sanitize_details(event.get("details"))
+
+    # ── 2. Write sanitized event to JSONL ─────────────────────────────────
     with _file_lock:
         with open(LOG_FILE, "a", encoding="utf-8") as f:
-            f.write(json.dumps(event) + "\n")
+            f.write(json.dumps(persisted_event) + "\n")
 
-    # ── 3. Save to DB with label ──────────────────────────────────────────
+    # ── 3. Save sanitized event to DB with label ──────────────────────────
     try:
-        db_event = dict(event)
+        db_event = dict(persisted_event)
         if classification:
-            # Inject label into details so database.py picks it up
             db_event["attack_label"] = classification.get("label")
             db_event["attack_name"]  = classification.get("name")
         _save_with_label(db_event, classification)
@@ -117,9 +128,12 @@ def log_event(service, attacker_ip, attacker_port, event_type, details=None):
             f"AI: {label} ({conf*100:.0f}%) [{severity.upper()}]"
         )
     else:
-        logger.info(f"[{event_type}] {attacker_ip}:{attacker_port} | {details}")
+        logger.info(
+            f"[{event_type}] {attacker_ip}:{attacker_port} | "
+            f"{persisted_event['details']}"
+        )
 
-    return event
+    return persisted_event
 
 
 def _save_with_label(event: dict, classification: dict):
@@ -143,8 +157,8 @@ def _save_with_label(event: dict, classification: dict):
         event_type    = event.get("event_type", ""),
         details       = _json.dumps(details),
         username      = details.get("username"),
-        password      = details.get("password"),
-        password_len  = len(details["password"]) if details.get("password") else None,
+        password      = None,
+        password_len  = details.get("password_len"),
         http_method   = details.get("method"),
         http_path     = details.get("path"),
         user_agent    = details.get("user_agent"),

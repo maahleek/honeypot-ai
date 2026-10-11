@@ -52,6 +52,11 @@ def extract(event: dict) -> list:
 
     username = str(details.get("username") or "").lower()
     password = str(details.get("password") or "")
+    try:
+        password_len = int(details.get("password_len"))
+    except (TypeError, ValueError):
+        password_len = len(password)
+
     payload  = str(
         details.get("body") or
         details.get("command") or
@@ -73,7 +78,7 @@ def extract(event: dict) -> list:
         1 if event_type == "COMMAND"        else 0,
 
         # ── Credential features ──────────────────────────────────────────────
-        len(password),
+        password_len,
         1 if username in _ROOT_USERS else 0,
 
         # ── Payload features ─────────────────────────────────────────────────
