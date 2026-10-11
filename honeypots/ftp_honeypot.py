@@ -3,7 +3,7 @@ from pyftpdlib.handlers   import FTPHandler
 from pyftpdlib.servers    import FTPServer
 from pyftpdlib.authorizers import DummyAuthorizer
 from capture.logger import log_event, get_logger
-from config import HOST, FTP_PORT, FTP_BANNER, MAX_LOGIN_ATTEMPTS
+from config import HOST, FTP_PORT, FTP_BANNER, MAX_LOGIN_ATTEMPTS, FTP_ROOT
 
 logger = get_logger("FTP")
 logging.getLogger("pyftpdlib").setLevel(logging.WARNING)
@@ -25,8 +25,11 @@ class HoneypotFTPHandler(FTPHandler):
 
 def start_ftp_honeypot():
     auth = DummyAuthorizer()
-    import os
-    auth.add_anonymous(os.path.expanduser("~"), perm="elradfmwMT")
+    FTP_ROOT.mkdir(parents=True, exist_ok=True)
+    # Isolate anonymous FTP sessions from the real user home directory.
+    # Read-only permissions keep the low-interaction service from becoming
+    # a general-purpose file drop on an internet-facing host.
+    auth.add_anonymous(str(FTP_ROOT), perm="elr")
     HoneypotFTPHandler.authorizer       = auth
     HoneypotFTPHandler.banner           = FTP_BANNER
     HoneypotFTPHandler.passive_ports    = range(60000, 60100)
