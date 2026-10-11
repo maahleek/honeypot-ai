@@ -1,0 +1,37 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+      - honeypot-hardening
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Compile source
+        run: |
+          python -m py_compile             config.py main.py             capture/logger.py capture/database.py capture/feature_extractor.py capture/exporter.py             honeypots/ssh_honeypot.py honeypots/http_honeypot.py honeypots/ftp_honeypot.py honeypots/telnet_honeypot.py             ml/dataset.py ml/train.py ml/predict.py dashboard/app.py
+
+      - name: Run hardening tests
+        run: python test_hardening.py
