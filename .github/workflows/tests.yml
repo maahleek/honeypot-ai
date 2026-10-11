@@ -35,3 +35,12 @@ jobs:
 
       - name: Run hardening tests
         run: python test_hardening.py
+
+      - name: Train and evaluate models
+        run: python -m ml.train
+
+      - name: Upload evaluation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: honeypot-training-report
+          path: ml/model/training_report.json
