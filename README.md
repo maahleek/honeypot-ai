@@ -1,39 +1,62 @@
-# 🍯 AI-Enhanced Honeypot System
+# AI-Enhanced Honeypot System
 
-> Real-Time Network Attack Classification Using Machine Learning
+Real-time network attack capture, machine-learning classification, and monitoring dashboard.
 
-An AI-enhanced honeypot system designed to capture real-world network interactions, extract relevant features, classify network attacks using machine learning, and present detected activity through a real-time web dashboard.
+This project was developed as an academic cybersecurity system and as a portfolio project demonstrating Python backend engineering, network programming, data pipelines, machine learning, SQLite, Flask, and cloud deployment.
 
-The system simulates four commonly targeted network services — **SSH, HTTP, FTP, and Telnet** — and was deployed on **AWS EC2** to collect genuine internet attack traffic for model training and evaluation.
+## What the system does
 
----
+The application exposes four low-interaction honeypot services:
 
-## Dashboard Preview
+- SSH
+- HTTP
+- FTP
+- Telnet
 
-The web dashboard provides real-time monitoring of honeypot activity, including attack statistics, service breakdowns, attack classifications, severity levels, source information, and recent events.
+Incoming activity is captured as structured events, transformed into a 17-feature vector, classified by the trained model, stored in SQLite/JSONL, and displayed through a Flask dashboard.
 
----
+The live data path is:
 
-## Features
+```text
+Internet traffic
+      |
+      v
+SSH / HTTP / FTP / Telnet honeypots
+      |
+      v
+Event capture + feature extraction
+      |
+      v
+ML classifier
+      |
+      +----> SQLite / JSONL
+      |
+      v
+Flask monitoring dashboard
+```
 
-- **4 Honeypot Services** — SSH, HTTP, FTP, and Telnet
-- **Real-World Attack Collection** — deployed on AWS EC2 to capture genuine internet traffic
-- **Real-Time Attack Classification** — captured events are classified as they occur
-- **17-Feature ML Pipeline** — 14 core features plus 3 event-type features
-- **Random Forest Classifier** — selected as the final deployed classification model
-- **XGBoost Comparison** — evaluated alongside Random Forest during model development
-- **Live Web Dashboard** — Flask-based interface for monitoring captured activity
-- **Persistent Event Storage** — SQLite database and JSONL logging
-- **Severity Scoring** — LOW, MEDIUM, HIGH, and CRITICAL classifications
+## Portfolio highlights
 
----
+- Multi-service honeypot built in Python
+- Real internet traffic collection on AWS EC2
+- 13,616 captured events in the published research dataset
+- 17-feature real-time classification pipeline
+- Random Forest and XGBoost model comparison
+- Genuine-only held-out evaluation protocol
+- Synthetic examples restricted to training
+- SQLite persistence and JSONL event logging
+- Responsive Flask/Chart.js monitoring dashboard
+- Safer isolated FTP environment
+- Password redaction before persistent storage
+- Private-by-default dashboard binding
+- Automated regression tests with GitHub Actions
 
-## Attack Categories
+## Attack categories
 
-The machine learning pipeline defines seven attack categories:
+The classifier defines seven research categories:
 
-| Label | Attack Type | Severity |
-|---|---|---|
+| Label | Category | Severity |
+|---:|---|---|
 | 0 | Normal / Benign | Low |
 | 1 | Brute Force | High |
 | 2 | Port Scan | Medium |
@@ -42,41 +65,47 @@ The machine learning pipeline defines seven attack categories:
 | 5 | Command Injection | Critical |
 | 6 | Credential Stuffing | High |
 
-During the live AWS deployment, genuine samples were observed for five of these categories:
+The captured dataset contains genuine examples for Normal, Brute Force, Port Scan, SQL Injection, and Credential Stuffing. DoS/Flood and Command Injection are represented by synthetic training-only examples because those classes were not observed in the captured dataset.
 
-- Normal / Benign
-- Brute Force
-- Port Scan
-- SQL Injection
-- Credential Stuffing
+## Dataset and evaluation protocol
 
-**DoS / Flood** and **Command Injection** were not observed in the genuine internet-captured dataset. Synthetic samples for these under-represented classes were therefore used during training only and were excluded from the final real-world evaluation.
+The repository includes 13,616 captured honeypot events.
 
----
+Training now follows this sequence:
 
-## Dataset
+```text
+13,616 genuine events
+        |
+        +---- 80% genuine training partition
+        |
+        +---- 20% untouched genuine test partition (2,724 rows)
 
-The final dataset consisted of:
+genuine training partition
+        +
+1,050 synthetic training-only rows
+        |
+        v
+model training
 
-| Data Source | Samples |
-|---|---:|
-| Genuine internet-captured events | 13,616 |
-| Synthetic training samples | 1,050 |
-| **Total** | **14,666** |
+untouched genuine test partition
+        |
+        v
+final evaluation
+```
 
-From the **13,616 genuine samples**, **2,724 samples** were reserved as the held-out real-world test set.
+Synthetic rows are never added to the held-out test partition.
 
-The remaining **10,892 genuine samples**, together with the **1,050 synthetic samples**, were used during model training.
+The scaler is also fitted on training data only.
 
-Synthetic samples were **not included in the final real-world test set**.
+Historical CSV exports used 14 stored feature columns. The current loader deterministically backfills the three event-state flags from the recorded event type so old captures remain reproducible with the current 17-feature pipeline.
 
----
+### Important research limitation
 
-## Feature Extraction
+The historical dataset was labelled using deterministic event rules from the honeypot. Some current features are also derived from event metadata, so this repository treats the model as a baseline event-classification system rather than claiming that the historical labels constitute an independent ground truth.
 
-Each captured honeypot event is transformed into a **17-feature vector** before classification.
+A stronger future research version would add temporal/session behaviour such as connection rate, authentication-attempt rate, unique ports, username diversity, and rolling request counts, then label/evaluate those sessions independently.
 
-The extracted features are:
+## 17-feature vector
 
 1. `service_ssh`
 2. `service_http`
@@ -96,51 +125,64 @@ The extracted features are:
 16. `is_disconnection`
 17. `is_request`
 
-The final three event-type features help distinguish connection, disconnection, and request behaviour within captured honeypot traffic.
+Raw passwords are used only long enough to derive features for the current event. Before an event is written to JSONL or SQLite, the password is removed and only its length is retained.
 
----
+The public training dataset also excludes attacker IP addresses because IP address is not a model feature.
 
-## System Architecture
+## Model training
 
-```text
-┌─────────────────────────────────────┐
-│          INTERNET / ATTACKERS       │
-└──────────────────┬──────────────────┘
-                   │
-                   ▼
-┌─────────────────────────────────────┐
-│            HONEYPOT LAYER           │
-│      SSH | HTTP | FTP | Telnet      │
-└──────────────────┬──────────────────┘
-                   │
-                   │ Raw Events
-                   ▼
-┌─────────────────────────────────────┐
-│       CAPTURE & FEATURE LAYER       │
-│       Logger → 17-Feature Extractor │
-│          JSONL + SQLite Storage     │
-└──────────────────┬──────────────────┘
-                   │
-                   │ Feature Vector
-                   ▼
-┌─────────────────────────────────────┐
-│       ML CLASSIFICATION LAYER       │
-│           Random Forest             │
-└──────────────────┬──────────────────┘
-                   │
-                   │ Classified Events
-                   ▼
-┌─────────────────────────────────────┐
-│        REAL-TIME DASHBOARD          │
-│       Flask REST API + Web UI       │
-└─────────────────────────────────────┘
+Two ensemble classifiers are evaluated:
+
+### Random Forest
+
+Current training configuration:
+
+- 500 trees
+- maximum depth 20
+- balanced class weights
+- fixed random seed
+- 17 input features
+
+### XGBoost
+
+XGBoost is trained on the same training partition and evaluated against the same untouched genuine test partition.
+
+The model with the stronger genuine holdout accuracy is saved as `ml/model/classifier.joblib`. An exact tie is resolved in favour of Random Forest because it is easier to explain and cheaper to run for this project.
+
+Generated model binaries and reports are intentionally not committed to Git.
+
+Run:
+
+```bash
+python -m ml.train
 ```
 
-Captured events are processed through the feature extraction pipeline and classified synchronously by the deployed Random Forest model. The event and its classification result are then stored and made available to the monitoring dashboard.
+This generates:
 
----
+```text
+ml/model/classifier.joblib
+ml/model/scaler.joblib
+ml/model/training_report.json
+```
 
-## Project Structure
+The generated report is the source of truth for accuracy and per-class precision/recall/F1. The README intentionally does not hard-code a headline accuracy that can become stale after retraining.
+
+## Security hardening
+
+This portfolio branch includes several safeguards for internet-facing deployment:
+
+- anonymous FTP is rooted in `data/ftp_root`, not the operating-system user's home directory
+- anonymous FTP is read-only
+- SSH host keys are created inside the ignored `keys/` directory
+- the dashboard binds to `127.0.0.1` by default
+- raw passwords are redacted before persistent storage
+- attacker IP addresses are removed from the published ML dataset
+- runtime logs, databases, keys, secrets, and generated model files are ignored by Git
+- dashboard confidence is not fabricated when confidence was not persisted
+
+For a public server, expose only the honeypot ports you intend to study. Keep the dashboard behind SSH tunnelling, a VPN, firewall rules, or an authenticated reverse proxy.
+
+## Project structure
 
 ```text
 honeypot-ai/
@@ -149,246 +191,147 @@ honeypot-ai/
 │   ├── http_honeypot.py
 │   ├── ftp_honeypot.py
 │   └── telnet_honeypot.py
-│
 ├── capture/
 │   ├── logger.py
 │   ├── database.py
 │   ├── feature_extractor.py
-│   ├── exporter.py
-│   └── inference_engine.py
-│
+│   └── exporter.py
 ├── ml/
 │   ├── dataset.py
 │   ├── train.py
-│   ├── predict.py
-│   └── model/
-│       ├── classifier.joblib
-│       ├── label_encoder.joblib
-│       └── scaler.joblib
-│
+│   └── predict.py
 ├── dashboard/
 │   ├── app.py
 │   └── templates/
 │       └── index.html
-│
 ├── data/
-├── logs/
+│   └── dataset.csv
 ├── config.py
 ├── main.py
+├── test_hardening.py
 ├── requirements.txt
 └── README.md
 ```
 
----
-
 ## Installation
 
-### Prerequisites
-
-- Python 3.11+
-- Linux environment recommended
-- Git
-- pip
-
-### 1. Clone the Repository
+Python 3.11+ is recommended.
 
 ```bash
 git clone https://github.com/maahleek/honeypot-ai.git
 cd honeypot-ai
+
+python -m venv venv
 ```
 
-### 2. Create a Virtual Environment
+Linux/macOS:
 
 ```bash
-python -m venv venv
 source venv/bin/activate
 ```
 
-On Windows:
+Windows PowerShell:
 
-```bash
-venv\Scripts\activate
+```powershell
+.\venv\Scripts\Activate.ps1
 ```
 
-### 3. Install Dependencies
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Train the Models
+Copy `.env.example` to `.env` if you want to change ports or dashboard settings.
+
+Train the model:
 
 ```bash
 python -m ml.train
 ```
 
-### 5. Start the Honeypot System
+Run the complete system:
 
 ```bash
 python main.py
 ```
 
-The monitoring dashboard is available locally on port `5000`.
+## Development ports
 
----
+| Service | Default port |
+|---|---:|
+| SSH | 2222 |
+| HTTP | 8080 |
+| FTP | 2121 |
+| Telnet | 2323 |
+| Dashboard | 5000 |
 
-## Testing the Honeypots
+The honeypot services listen on `0.0.0.0` by default. The dashboard listens only on `127.0.0.1` unless explicitly changed.
 
-### SSH
+## Local testing
+
+SSH:
 
 ```bash
 ssh root@localhost -p 2222
 ```
 
-### HTTP
+HTTP:
 
 ```bash
 curl http://localhost:8080/admin
 ```
 
-Example SQL injection-style request:
-
-```bash
-curl "http://localhost:8080/search?q=' OR 1=1--"
-```
-
-### FTP
+FTP:
 
 ```bash
 ftp localhost 2121
 ```
 
-### Telnet
+Telnet:
 
 ```bash
 telnet localhost 2323
 ```
 
----
+Regression tests:
 
-## Port Reference
+```bash
+python test_hardening.py
+```
 
-| Service | Development Port | Deployment Port |
-|---|---:|---:|
-| SSH | 2222 | 22 |
-| HTTP | 8080 | 80 |
-| FTP | 2121 | 21 |
-| Telnet | 2323 | 23 |
-| Dashboard | 5000 | 5000 |
+The same compile and hardening tests run automatically through GitHub Actions.
 
-> Ports below 1024 may require elevated privileges depending on the deployment environment.
+## Tech stack
 
----
-
-## Machine Learning Models
-
-Two ensemble machine learning algorithms were evaluated:
-
-### Random Forest
-
-The final Random Forest classifier was configured with:
-
-- **500 decision trees**
-- Maximum depth of **20**
-- Balanced class weighting
-- **17 input features**
-
-Random Forest was selected as the final deployed classifier.
-
-### XGBoost
-
-XGBoost was also trained and evaluated as a comparative model.
-
-The final evaluation showed that Random Forest performed substantially better on the genuine held-out honeypot data.
-
----
-
-## Final Model Evaluation
-
-The final evaluation was performed using **2,724 held-out samples drawn entirely from genuine internet-captured honeypot traffic**.
-
-| Model | Accuracy |
-|---|---:|
-| **Random Forest** | **100%** |
-| XGBoost | **60.8%** |
-
-The Random Forest model achieved perfect classification across the **five real-world classes represented in the held-out test set**.
-
-The result should be interpreted within the scope of the collected dataset. In particular, **SQL Injection had only one genuine test instance**, while **DoS / Flood and Command Injection had no genuine test samples** and were therefore not part of the final real-world evaluation.
-
----
-
-## Tech Stack
-
-| Component | Technology |
+| Area | Technology |
 |---|---|
-| Programming Language | Python |
-| SSH Honeypot | Paramiko |
-| FTP Honeypot | pyftpdlib |
-| HTTP Honeypot | Flask |
-| Dashboard Backend | Flask |
-| Database | SQLite / SQLAlchemy |
-| Machine Learning | scikit-learn / XGBoost |
-| Data Processing | pandas / NumPy |
-| Model Serialization | joblib |
-| Frontend | HTML / CSS / JavaScript / Chart.js |
-| Deployment | AWS EC2 |
-| Version Control | Git / GitHub |
+| Language | Python |
+| SSH | Paramiko |
+| FTP | pyftpdlib |
+| HTTP honeypot | Flask |
+| Dashboard | Flask + Chart.js |
+| Database | SQLite + SQLAlchemy |
+| ML | scikit-learn + XGBoost |
+| Data | pandas + NumPy |
+| Model persistence | joblib |
+| Cloud deployment | AWS EC2 |
+| CI | GitHub Actions |
 
----
+## Academic context
 
-## Project Limitations
+Project title:
 
-- The system is a **low-interaction honeypot** and does not provide attackers with a complete operating-system environment.
-- DoS / Flood and Command Injection were not observed during live internet data collection.
-- SQL Injection had very limited representation in the genuine held-out test data.
-- The system was developed and evaluated as an academic research project rather than a large-scale production security platform.
-- Model performance may change when exposed to different traffic distributions and previously unseen attack patterns.
+**Design and Implementation of an AI-Enhanced Honeypot System for Real-Time Network Attack Classification**
 
----
-
-## Future Improvements
-
-Possible future improvements include:
-
-- Collecting more genuine attack samples for under-represented classes
-- Extending the duration and scale of live honeypot deployment
-- Periodically retraining the classifier as new attack data becomes available
-- Further tuning and evaluating XGBoost and other machine learning models
-- Exploring higher-interaction honeypot environments
-- Extending the dashboard with historical trends and additional alerting capabilities
-
----
+Department of Computer Science  
+University of Maiduguri  
+2026
 
 ## Author
 
-**Abdulmalik Adams Onoruoyiza (Maahleek)**  
-Computer Science  
-University of Maiduguri, Nigeria
+**Abdulmalik Adams Onoruoyiza (Maahleek)**
 
----
+## Responsible use
 
-## Academic Project
-
-**Project Title:**  
-*Design and Implementation of an AI-Enhanced Honeypot System for Real-Time Network Attack Classification*
-
-**Department:** Computer Science  
-**Faculty:** Faculty of Physical Sciences  
-**Institution:** University of Maiduguri  
-**Year:** 2026
-
----
-
-## Acknowledgements
-
-- Department of Computer Science, University of Maiduguri
-- Project Supervisor: **Prof. Dada Emmanuel Gbenga**
-
----
-
-## License
-
-This repository is intended primarily for academic and cybersecurity research purposes.
-
-If an MIT `LICENSE` file is included in the repository, the source code is distributed according to the terms of that license.
+This repository is intended for defensive cybersecurity research, controlled lab testing, education, and authorized honeypot deployment. Do not deploy services or capture traffic on systems you do not own or have permission to monitor.
