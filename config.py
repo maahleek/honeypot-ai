@@ -10,24 +10,28 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent
 
 # ─── Honeypot Network Settings ───────────────────────────────────────────────
-HOST        = '0.0.0.0'     # Listen on all interfaces
+HOST        = os.getenv("HONEYPOT_HOST", "0.0.0.0")
 
-SSH_PORT    = 2222          # Real SSH is on 22; we use 2222 for dev/testing
-HTTP_PORT   = 8080          # Real HTTP is on 80
-FTP_PORT    = 2121          # Real FTP is on 21
-TELNET_PORT = 2323          # Real Telnet is on 23
+SSH_PORT    = int(os.getenv("SSH_PORT", "2222"))
+HTTP_PORT   = int(os.getenv("HTTP_PORT", "8080"))
+FTP_PORT    = int(os.getenv("FTP_PORT", "2121"))
+TELNET_PORT = int(os.getenv("TELNET_PORT", "2323"))
 
 # NOTE: On a real deployment server (VPS/cloud), change these to:
 #   SSH_PORT=22, HTTP_PORT=80, FTP_PORT=21, TELNET_PORT=23
 #   and run with sudo so the OS allows binding to privileged ports (<1024)
 
 # ─── Dashboard Settings ───────────────────────────────────────────────────────
-DASHBOARD_HOST = '0.0.0.0'
-DASHBOARD_PORT = 5000
-SECRET_KEY     = os.getenv('SECRET_KEY', 'hp-dev-secret-CHANGE-IN-PRODUCTION')
+# Keep the dashboard private by default. Override with DASHBOARD_HOST only
+# when it is protected by a firewall, VPN, reverse proxy, or authentication.
+DASHBOARD_HOST = os.getenv("DASHBOARD_HOST", "127.0.0.1")
+DASHBOARD_PORT = int(os.getenv("DASHBOARD_PORT", "5000"))
+SECRET_KEY     = os.getenv("SECRET_KEY", "hp-dev-secret-CHANGE-IN-PRODUCTION")
 
 # ─── Database ─────────────────────────────────────────────────────────────────
-DB_PATH = BASE_DIR / 'data' / 'honeypot.db'
+DB_PATH = BASE_DIR / "data" / "honeypot.db"
+FTP_ROOT = BASE_DIR / "data" / "ftp_root"
+KEY_DIR = BASE_DIR / "keys"
 
 # ─── Logging ──────────────────────────────────────────────────────────────────
 LOG_DIR  = BASE_DIR / 'logs'
